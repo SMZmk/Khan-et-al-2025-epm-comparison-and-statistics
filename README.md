@@ -1,5 +1,3 @@
-Of course. Here is the README for your Git repository, formatted in markdown.
-
 # arabis-drought-tolerance-epm-analyses
 
 This repository contains the R and Python scripts used to analyze gene expression and regulatory networks related to drought tolerance in the plant species **Arabis nemorensis** and **Arabis sagittata**. The analyses leverage deep learning models to identify **Expression Predictive Motifs (EPMs)** and investigate their distribution and enrichment within differentially expressed genes.
