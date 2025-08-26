@@ -1,0 +1,52 @@
+Documentation: create_visual_alignment_v2.py
+1. Purpose:
+
+This script generates a combined FASTA alignment file that visually represents the locations of short pattern sequences onto a larger reference sequence alignment. It takes an existing reference alignment, a file of pattern sequences, and a mapping file (telling it where the patterns belong) to produce a single FASTA file suitable for viewing in alignment software (like AliView, Jalview, SeaView, UGENE etc.).
+
+2. Workflow Overview:
+
+The process involves a preliminary step to find the matches, followed by using this script to format the output.
+
+Step 0: Finding Pattern Locations (Manual/External Tool)
+
+Goal: Determine the starting position(s) on the reference sequences where each pattern sequence occurs.
+How: This step is performed before using the create_visual_alignment_v2.py script. You typically use a sequence alignment or mapping tool. Common choices include:
+BLAST: (Basic Local Alignment Search Tool) Can be used to search the patterns against the reference sequences. You would need to parse the BLAST output to extract the start position of the alignment on the reference sequence for each pattern hit.
+Other Mappers: Tools like Bowtie2, BWA, or BLAT might also be used, especially if dealing with many short patterns and a large reference. Again, the key is to extract the start position of each match on the reference.
+Pattern Matching Tools: Tools like fuzznuc (from EMBOSS) or custom scripts (like the first one we developed that used regular expressions) could find exact or approximate matches and report their start positions.
+Crucial Output: Regardless of the tool used, the results must be processed into a simple 2-column, tab-separated file (referred to as the "map file" or alingment_index.tsv in the script's context). The format must be:
+PatternID_from_File2<tab>StartPosition_on_Reference
+Where StartPosition_on_Reference is the 1-based coordinate where the pattern begins. Each line represents one occurrence of a pattern.
+Step 1: Script Input
+
+The create_visual_alignment_v2.py script takes three input files:
+--reference: Your original reference alignment in multi-FASTA format (file1.fas / miR408_homologous_region_aling_Atha-Anem-Asag.fas).
+--patterns: Your collection of short pattern sequences in multi-FASTA format (file2.fas / miR408_AthAnemAsag_aling_EPMmap.fas).
+--map: The 2-column, tab-separated map file you created in Step 0 (alingment_index.tsv), containing PatternID\tStartPosition.
+Step 2: Script Processing
+
+The script reads the reference alignment (--reference) to determine the maximum sequence length.
+It reads the pattern sequences (--patterns) into memory.
+It reads the map file (--map) line by line.
+For each line in the map file:
+It identifies the pattern sequence using the PatternID.
+It calculates the number of leading gaps needed (StartPosition - 1).
+It creates a new sequence string consisting of leading gaps + the pattern sequence.
+It truncates the pattern if it extends beyond the maximum alignment length (determined from the reference file).
+It adds trailing gaps so the total length matches the maximum alignment length.
+It handles cases where the same PatternID appears multiple times in the map file by appending a unique suffix (0), (1), (2), etc., to the sequence ID in the output file.
+It ensures all original reference sequences are also padded to the maximum length if needed.
+Step 3: Script Output
+
+The script writes a single new multi-FASTA file (--output).
+This file contains all the original reference sequences (padded/truncated to be equal length) followed by all the pattern sequences, now padded with gaps according to their specified start positions.
+This output file can be opened in an alignment viewer to see the patterns positioned correctly relative to the reference sequences.
+3. Usage:
+
+Bash
+
+python create_visual_alignment_v2.py \
+    --reference <path_to_reference_fasta_alignment> \
+    --patterns <path_to_patterns_fasta> \
+    --map <path_to_map_file_tsv> \
+    --output <desired_output_fasta_filename>
